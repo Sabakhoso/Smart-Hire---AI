@@ -1,0 +1,36 @@
+
+# Pydantic schemas for the User entity.
+
+
+from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
+
+
+class UserCreate(BaseModel):
+    """Schema for user registration requests."""
+
+    full_name: str = Field(..., min_length=1, max_length=255)
+    email: EmailStr
+    password: str = Field(..., min_length=8, max_length=128)
+
+
+class UserLogin(BaseModel):
+    """Schema for user login requests."""
+
+    email: EmailStr
+    password: str
+
+
+class UserResponse(BaseModel):
+    """Schema for returning user data in API responses. Excludes password fields."""
+
+    id: int
+    full_name: str
+    email: EmailStr
+    is_verified: bool
+    is_active: bool
+    created_at: datetime
+
+    # Allows population directly from SQLAlchemy ORM objects.
+    model_config = ConfigDict(from_attributes=True)

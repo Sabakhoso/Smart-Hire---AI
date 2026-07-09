@@ -1,0 +1,55 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ===== Virtual Environment =====
+venv/
+env/
+.venv/
+ENV/
+
+# ===== Environment Variables =====
+.env
+.env.*
+!.env.example
+
+# ===== Database =====
+*.db
+*.sqlite3
+*.sqlite3-journal
+
+# ===== Uploads =====
+uploads/
+!uploads/.gitkeep
+
+# ===== Testing / Coverage =====
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ===== VS Code =====
+.vscode/
+*.code-workspace
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== OS Generated Files =====
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ===== Logs =====
+*.log
+
+# ===== Type Checking / Linting Cache =====
+.mypy_cache/
+.ruff_cache/
