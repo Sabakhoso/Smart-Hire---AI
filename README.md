@@ -1,10 +1,3 @@
-I think **SmartHire AI** is a much stronger name than *AI Resume Analyzer*.
-
-It sounds like a complete product rather than just a resume checker, and it fits the vision you described (students/job seekers + HR/recruiters).
-
-Here's a more professional, human-written **README.md** for your project.
-
----
 
 # SmartHire AI
 
