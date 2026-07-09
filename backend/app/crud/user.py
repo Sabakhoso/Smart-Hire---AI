@@ -1,7 +1,7 @@
-# Database operations for the User entity.
-# Contains data-access logic only — no route handlers or business validation.
-
-
+"""
+Database operations for the User entity.
+Contains data-access logic only — no route handlers or business validation.
+"""
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,13 +18,14 @@ def get_user_by_email(db: Session, email: str) -> User | None:
 
 
 def create_user(db: Session, user_create: UserCreate) -> User:
-    """Hash the password and persist a new user record."""
+    """Hash the password and persist a new user record, including their role."""
     hashed_password = hash_password(user_create.password)
 
     db_user = User(
         full_name=user_create.full_name,
         email=user_create.email,
         hashed_password=hashed_password,
+        role=user_create.role,
     )
 
     db.add(db_user)

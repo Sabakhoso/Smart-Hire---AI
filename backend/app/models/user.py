@@ -1,13 +1,20 @@
+# User model for the AI Resume Analyzer / SmartHire AI project.
 
-# User model for the AI Resume Analyzer project.
 
-
+import enum
 from datetime import datetime
 
-from sqlalchemy import String, Boolean, DateTime, func
+from sqlalchemy import String, Boolean, DateTime, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
+
+
+class UserRole(str, enum.Enum):
+    """Allowed user roles for role-based access control."""
+
+    JOB_SEEKER = "job_seeker"
+    RECRUITER = "recruiter"
 
 
 class User(Base):
@@ -24,6 +31,14 @@ class User(Base):
     )
 
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    # Role-based access control: determines whether the user is a job seeker or recruiter.
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole, name="user_role"),
+        default=UserRole.JOB_SEEKER,
+        server_default=UserRole.JOB_SEEKER.value,
+        nullable=False,
+    )
 
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 

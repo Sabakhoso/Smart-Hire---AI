@@ -1,7 +1,9 @@
+"""
+backend/app/routers/auth.py
 
-# Authentication routes for the AI Resume Analyzer project.
-# Implements user registration, login, and the authenticated profile endpoint.
-
+Authentication routes for the AI Resume Analyzer / SmartHire AI project.
+Implements user registration, login, and the authenticated profile endpoint.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -32,7 +34,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
 def login(credentials: UserLogin, db: Session = Depends(get_db)):
-    """Authenticate a user and return a JWT access token."""
+    """Authenticate a user and return a JWT access token, including their role."""
     user = get_user_by_email(db, credentials.email)
 
     if not user or not verify_password(credentials.password, user.hashed_password):
@@ -42,7 +44,11 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"sub": str(user.id), "email": user.email})
+    # Role is embedded in the token payload so downstream dependencies
+    # can perform role checks without an extra database lookup.
+    access_token = create_access_token(
+        data={"sub": str(user.id), "email": user.email, "role": user.role.value}
+    )
 
     return Token(access_token=access_token, token_type="bearer")
 

@@ -36,3 +36,13 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+def require_recruiter(current_user: User = Depends(get_current_user)) -> User:
+    """Allow access only to users with the 'recruiter' role. Raises 403 otherwise."""
+    if current_user.role != UserRole.RECRUITER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This action is restricted to recruiters.",
+        )
+
+    return current_user
