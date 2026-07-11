@@ -1,17 +1,16 @@
-
 # Reusable authentication dependencies for the AI Resume Analyzer project.
 
-
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.core.security import verify_access_token
-from app.models.user import User
+from app.models.user import User, UserRole
 
-# Points to the login endpoint that issues tokens (used for OpenAPI docs / auth flow).
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+# HTTPBearer tells Swagger to show a simple token field.
+# It extracts the Bearer token from the Authorization header.
+oauth2_scheme = HTTPBearer()
 
 
 def get_current_user(
@@ -25,7 +24,7 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    payload = verify_access_token(token)
+    payload = verify_access_token(token.credentials)  # ← FIXED
     user_id = payload.get("sub")
 
     if user_id is None:
@@ -37,6 +36,7 @@ def get_current_user(
 
     return user
 
+
 def require_recruiter(current_user: User = Depends(get_current_user)) -> User:
     """Allow access only to users with the 'recruiter' role. Raises 403 otherwise."""
     if current_user.role != UserRole.RECRUITER:
@@ -44,5 +44,4 @@ def require_recruiter(current_user: User = Depends(get_current_user)) -> User:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This action is restricted to recruiters.",
         )
-
-    return current_user
+    return current_user  # ← FIXED (removed trailing comma)

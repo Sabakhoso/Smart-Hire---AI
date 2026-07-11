@@ -5,10 +5,11 @@ import os
 load_dotenv()
 
 class Settings:
-    PROJECT_NAME = "AI Resume Analyzer"
+    PROJECT_NAME = "Smart Hire-AI"
     PROJECT_VERSION = "1.0.0"
 
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
     DATABASE_URL = os.getenv("DATABASE_URL")
 

@@ -1,22 +1,20 @@
 """
-AI-powered candidate-to-job matching service using Google's Gemini API.
-Accepts resume text and a job description, returns a structured match analysis.
-Contains AI analysis logic only — no routes or database operations.
+AI-powered candidate-to-job matching service for SmartHire AI, using Groq API.
+Compares a resume against a job description and returns a structured match analysis.
 """
 
 import json
 
-from google import genai
-from google.genai import types
+from groq import Groq
 
 from app.config import settings
 from app.prompts.matcher_prompt import build_matcher_prompt
 
-# Reusable Gemini client, configured with the API key from settings.
-client = genai.Client(api_key=settings.GEMINI_API_KEY)
+# Reusable Groq client.
+client = Groq(api_key=settings.GROQ_API_KEY)
 
-# Model used for candidate-job matching.
-GEMINI_MODEL = "gemini-2.5-flash"
+# Model used for matching.
+GROQ_MODEL = "llama-3.1-8b-instant"
 
 # Keys expected in every successful match response.
 REQUIRED_KEYS = [
@@ -31,57 +29,47 @@ REQUIRED_KEYS = [
 ]
 
 
-def _validate_match_result(result: dict) -> None:
+def _validate_match(match: dict) -> None:
     """Ensure the parsed JSON contains all expected keys."""
-    missing_keys = [key for key in REQUIRED_KEYS if key not in result]
+    missing_keys = [key for key in REQUIRED_KEYS if key not in match]
     if missing_keys:
-        raise RuntimeError(f"Gemini response missing expected keys: {missing_keys}")
+        raise RuntimeError(f"Groq response missing expected keys: {missing_keys}")
 
 
 def match_resume_to_job(resume_text: str, job_description: str) -> dict:
     """
-    Send a candidate's resume and a job description to Gemini and return
-    a structured match analysis.
-
-    Returns a dictionary with keys: overall_score, skills_match,
-    experience_match, education_match, strengths, missing_skills,
-    recommendations, final_summary.
+    Compare a resume against a job description and return a match analysis.
 
     Raises:
-        ValueError: if resume_text or job_description is empty.
-        RuntimeError: if the API call fails or the response is invalid/malformed.
+        ValueError: if either input is empty.
+        RuntimeError: if the API call fails or the response is invalid.
     """
     if not resume_text or not resume_text.strip():
         raise ValueError("Resume text is empty; nothing to match.")
-
     if not job_description or not job_description.strip():
         raise ValueError("Job description is empty; nothing to match against.")
 
-    prompt = build_matcher_prompt(resume_text=resume_text, job_description=job_description)
+    messages = build_matcher_prompt(resume_text, job_description)
 
-    # Call the Gemini API, wrapping SDK/network errors in a clear exception.
     try:
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.3,
-            ),
+        response = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=messages,
+            temperature=0.3,
+            response_format={"type": "json_object"},
         )
     except Exception as exc:
-        raise RuntimeError(f"Gemini API request failed: {exc}") from exc
+        raise RuntimeError(f"Groq API request failed: {exc}") from exc
 
-    raw_text = response.text
+    raw_text = response.choices[0].message.content
     if not raw_text:
-        raise RuntimeError("Gemini API returned an empty response.")
+        raise RuntimeError("Groq API returned an empty response.")
 
-    # Parse the model's JSON output into a Python dict.
     try:
-        result = json.loads(raw_text)
+        match = json.loads(raw_text)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"Failed to parse Gemini response as JSON: {exc}") from exc
+        raise RuntimeError(f"Failed to parse Groq response as JSON: {exc}") from exc
 
-    _validate_match_result(result)
+    _validate_match(match)
 
-    return result
+    return match

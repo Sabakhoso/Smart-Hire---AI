@@ -1,7 +1,5 @@
-
 # Security utilities for the AI Resume Analyzer project.
 # Handles password hashing/verification and JWT access token creation/validation.
-
 
 from datetime import datetime, timedelta, timezone
 

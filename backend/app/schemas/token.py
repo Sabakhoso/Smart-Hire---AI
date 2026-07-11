@@ -1,5 +1,6 @@
-# Pydantic schema for JWT access token responses.
-
+"""
+Pydantic schema for JWT access token responses.
+"""
 
 from pydantic import BaseModel
 

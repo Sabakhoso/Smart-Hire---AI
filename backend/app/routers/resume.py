@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from app.schemas.resume import ResumeResponse
+from app.schemas.resume import ResumeResponse, ResumeUploadResponse
 from app.crud.resume import create_resume
 from app.parser.resume_parser import extract_resume_text
 from app.services.resume_analyzer import analyze_resume
@@ -56,7 +56,7 @@ async def _save_upload_file(file: UploadFile, allowed_extensions: set[str]) -> t
     return original_filename, stored_filename, file_path, contents
 
 
-@router.post("/upload", response_model=ResumeResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/upload", response_model=ResumeUploadResponse, status_code=status.HTTP_201_CREATED)
 async def upload_resume(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
@@ -95,7 +95,6 @@ async def analyze_resume_endpoint(
     try:
         resume_text = extract_resume_text(file_path)
     except ValueError as exc:
-        # Raised by the parser for unsupported file types (defensive; already filtered above).
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),

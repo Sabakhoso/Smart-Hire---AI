@@ -1,6 +1,4 @@
 """
-backend/app/crud/resume.py
-
 Database operations for the Resume entity.
 Contains data-access logic only — no route handlers or business validation.
 """
@@ -9,12 +7,24 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.resume import Resume
-from app.schemas.resume import ResumeAnalysisCreate
 
 
-def create_resume_analysis(db: Session, data: ResumeAnalysisCreate) -> Resume:
-    """Persist a completed resume analysis record."""
-    db_resume = Resume(**data.model_dump())
+def create_resume(
+    db: Session,
+    user_id: int,
+    original_filename: str,
+    stored_filename: str,
+    file_path: str,
+    file_size: int,
+) -> Resume:
+    """Persist a new resume record immediately after upload (pre-analysis)."""
+    db_resume = Resume(
+        user_id=user_id,
+        original_filename=original_filename,
+        stored_filename=stored_filename,
+        file_path=file_path,
+        file_size=file_size,
+    )
 
     db.add(db_resume)
     db.commit()

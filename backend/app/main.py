@@ -1,5 +1,4 @@
-
-# FastAPI application entry point for the AI Resume Analyzer project.
+# FastAPI application entry point for SmartHire AI.
 
 
 from contextlib import asynccontextmanager
@@ -11,15 +10,20 @@ from app.database.base import Base
 
 # Import models so SQLAlchemy registers them on Base.metadata before create_all runs.
 from app.models.user import User  # noqa: F401
+from app.models.resume import Resume  # noqa: F401
+from app.models.job import Job  # noqa: F401
 
 from app.routers.auth import router as auth_router
 from app.routers.resume import router as resume_router
+from app.routers.job import router as job_router
+from app.routers.matcher import router as matcher_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: create database tables if they don't already exist.
     Base.metadata.create_all(bind=engine)
-    print("✅ Database initialized successfully.")
+    print("Database initialized successfully.")
 
     yield
 
@@ -33,9 +37,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Register authentication routes.
+# Register routers.
 app.include_router(auth_router)
 app.include_router(resume_router)
+app.include_router(job_router)
+app.include_router(matcher_router)
 
 
 @app.get("/")

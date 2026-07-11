@@ -52,7 +52,6 @@ class ResumeResponse(BaseModel):
     overall_recommendation: str
     created_at: datetime
 
-    # Allows population directly from SQLAlchemy ORM objects.
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -62,6 +61,20 @@ class ResumeSummaryResponse(BaseModel):
     id: int
     original_filename: str
     ats_score: int
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ResumeUploadResponse(BaseModel):
+    """Schema returned immediately after resume upload (before AI analysis)."""
+
+    id: int
+    user_id: int
+    original_filename: str
+    stored_filename: str
+    file_path: str
+    file_size: int
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
