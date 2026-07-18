@@ -1,9 +1,9 @@
 # FastAPI application entry point for SmartHire AI.
 
-
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  
 
 from app.database.database import engine
 from app.database.base import Base
@@ -31,10 +31,19 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AI Resume Analyzer",
-    description="Backend API for analyzing resumes and generating ATS reports.",
+    title="Smart Hire AI",
+    description="Backend API for SmartHire AI, an AI-powered recruitment platform for resume analysis, ATS scoring, job management, and candidate matching.",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # frontend origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register routers.
